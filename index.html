@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Casa Okan — Calculadora de Orçamento</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --terracota: #C1603A;
+    --dourado: #C9993F;
+    --creme: #F7F0E6;
+    --creme-escuro: #EDE3D3;
+    --marrom: #3D2314;
+    --marrom-claro: #6B4C38;
+    --verde: #4A5E45;
+    --texto: #2A1A0E;
+    --branco: #fff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--creme);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--texto);
+    min-height: 100vh;
+    padding: 32px 16px 60px;
+  }
+
+  header { text-align: center; margin-bottom: 36px; }
+  header .icon { font-size: 2rem; margin-bottom: 6px; }
+  header h1 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--marrom); }
+  header p { font-size: 0.88rem; color: var(--marrom-claro); margin-top: 6px; }
+
+  .card {
+    background: var(--branco);
+    border-radius: 20px;
+    padding: 24px 20px;
+    max-width: 560px;
+    margin: 0 auto 20px;
+    border: 1.5px solid var(--creme-escuro);
+  }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--marrom);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title span {
+    background: var(--marrom);
+    color: var(--creme);
+    border-radius: 50%;
+    width: 22px; height: 22px;
+    font-size: 0.72rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Sans', sans-serif;
+    flex-shrink: 0;
+  }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--marrom-claro);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  select, input[type="number"], input[type="text"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--creme-escuro);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--texto);
+    background: var(--creme);
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  select:focus, input:focus { border-color: var(--terracota); background: #fff; }
+
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--marrom-claro);
+    pointer-events: none;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .chip {
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--creme-escuro);
+    font-size: 0.83rem;
+    cursor: pointer;
+    background: var(--creme);
+    color: var(--marrom-claro);
+    transition: all 0.18s;
+    font-family: 'DM Sans', sans-serif;
+    user-select: none;
+  }
+
+  .chip:hover { border-color: var(--terracota); color: var(--terracota); }
+  .chip.active { background: var(--marrom); color: var(--creme); border-color: var(--marrom); }
+
+  .linhas-wrap { display: flex; align-items: center; gap: 12px; }
+  .linhas-wrap button {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--creme-escuro);
+    background: var(--creme);
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--marrom);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .linhas-wrap button:hover { background: var(--creme-escuro); }
+  .linhas-wrap input { width: 70px; text-align: center; font-weight: 600; }
+
+  .frete-options { display: flex; gap: 10px; }
+  .frete-opt {
+    flex: 1; padding: 12px 8px;
+    border-radius: 10px;
+    border: 1.5px solid var(--creme-escuro);
+    background: var(--creme);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .frete-opt:hover { border-color: var(--terracota); }
+  .frete-opt.active { background: var(--marrom); border-color: var(--marrom); color: var(--creme); }
+  .frete-opt .frete-label { font-size: 0.82rem; font-weight: 600; }
+  .frete-opt .frete-val { font-size: 0.75rem; opacity: 0.7; margin-top: 3px; }
+
+  .frete-detalhes {
+    margin-top: 14px;
+    padding: 16px;
+    background: var(--creme);
+    border-radius: 12px;
+    display: none;
+  }
+  .frete-detalhes.visivel { display: block; }
+  .frete-detalhes .field { margin-bottom: 12px; }
+  .frete-detalhes .field:last-child { margin-bottom: 0; }
+
+  .hint { font-size: 0.75rem; color: var(--marrom-claro); margin-top: 6px; opacity: 0.8; }
+
+  /* Preview de valor */
+  .preview-valor {
+    background: var(--creme);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .preview-label { font-size: 0.78rem; color: var(--marrom-claro); text-transform: uppercase; letter-spacing: 0.08em; }
+  .preview-num { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--marrom); }
+
+  .btn-calcular {
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto 24px;
+    display: block;
+    padding: 16px;
+    background: var(--marrom);
+    color: var(--creme);
+    border: none;
+    border-radius: 14px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+  .btn-calcular:hover { background: #5A3020; }
+  .btn-calcular:active { transform: scale(0.98); }
+
+  #resultado { display: none; max-width: 560px; margin: 0 auto; }
+
+  .wpp-card {
+    background: var(--branco);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1.5px solid var(--creme-escuro);
+    margin-bottom: 16px;
+  }
+
+  .wpp-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--marrom-claro);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+
+  #wpp-texto {
+    width: 100%;
+    min-height: 280px;
+    background: #f0f2f5;
+    border-radius: 10px;
+    border: none;
+    padding: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: #111;
+    resize: vertical;
+    outline: none;
+    line-height: 1.7;
+  }
+
+  .btn-copiar {
+    width: 100%;
+    margin-top: 12px;
+    padding: 13px;
+    background: #25D366;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background 0.2s;
+  }
+  .btn-copiar:hover { background: #1dbb57; }
+  .btn-copiar.copiado { background: var(--verde); }
+
+  .btn-novo {
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    color: var(--marrom-claro);
+    border: 1.5px solid var(--creme-escuro);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .btn-novo:hover { border-color: var(--terracota); color: var(--terracota); }
+
+  .hidden { display: none !important; }
+
+  .separador {
+    border: none;
+    border-top: 1px dashed var(--creme-escuro);
+    margin: 16px 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="icon">🧵</div>
+  <h1>Casa Okan</h1>
+  <p>Calculadora de Orçamento</p>
+</header>
+
+<!-- CARD 1: CLIENTE + ITEM -->
+<div class="card">
+  <div class="card-title"><span>1</span> Cliente & Peça</div>
+
+  <div class="field">
+    <label>Nome do cliente</label>
+    <input type="text" id="cliente" placeholder="Ex: Mikael, Ana...">
+  </div>
+
+  <div class="field">
+    <label>Descrição da peça (opcional)</label>
+    <input type="text" id="descricao" placeholder="Ex: Oxalá e Iemanjá no mesmo bastidor">
+  </div>
+
+  <div class="field">
+    <label>Tipo de item</label>
+    <div class="select-wrap">
+      <select id="item" onchange="atualizarItem()">
+        <option value="">Selecione</option>
+        <option value="bastidor">Bastidor</option>
+        <option value="roupa">Roupa</option>
+        <option value="ecobag">Ecobag</option>
+        <option value="chaveiro">Chaveiro</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Tamanho bastidor -->
+  <div class="field hidden" id="campo-tamanho-bastidor">
+    <label>Tamanho do bastidor</label>
+    <div class="chips" id="chips-bastidor">
+      <div class="chip" onclick="selecionarChip(this,'tamanho')" data-val="10cm">10cm</div>
+      <div class="chip" onclick="selecionarChip(this,'tamanho')" data-val="12cm">12cm</div>
+      <div class="chip" onclick="selecionarChip(this,'tamanho')" data-val="15cm">15cm</div>
+      <div class="chip" onclick="selecionarChip(this,'tamanho')" data-val="20cm">20cm</div>
+      <div class="chip" onclick="selecionarChip(this,'tamanho')" data-val="24cm">24cm</div>
+      <div class="chip" onclick="selecionarChip(this,'tamanho')" data-val="30cm">30cm</div>
+    </div>
+  </div>
+
+  <!-- Tamanho roupa -->
+  <div class="field hidden" id="campo-tamanho-roupa">
+    <label>Tamanho da peça</label>
+    <div class="chips">
+      <div class="chip" onclick="selecionarChip(this,'tamanho')" data-val="P">P</div>
+      <div class="chip" onclick="selecionarChip(this,'tamanho')" data-val="M">M</div>
+      <div class="chip" onclick="selecionarChip(this,'tamanho')" data-val="G">G</div>
+      <div class="chip" onclick="selecionarChip(this,'tamanho')" data-val="GG">GG</div>
+    </div>
+  </div>
+
+  <div class="field hidden" id="campo-tecnica">
+    <label>Técnica</label>
+    <div class="chips" id="chips-tecnica"></div>
+  </div>
+
+</div>
+
+<!-- CARD 2: CÁLCULO INTERNO -->
+<div class="card">
+  <div class="card-title"><span>2</span> Cálculo interno</div>
+  <p class="hint" style="margin-bottom:14px">Esses dados não aparecem no orçamento do cliente.</p>
+
+  <div class="field">
+    <label>Complexidade</label>
+    <div class="chips">
+      <div class="chip" onclick="selecionarChip(this,'complexidade')" data-val="simples">Simples</div>
+      <div class="chip" onclick="selecionarChip(this,'complexidade')" data-val="medio">Médio</div>
+      <div class="chip" onclick="selecionarChip(this,'complexidade')" data-val="complexo">Complexo</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="field">
+      <label>Horas mín.</label>
+      <input type="number" id="horas-min" min="0.5" max="30" step="0.5" placeholder="Ex: 4" oninput="calcularPreview()">
+    </div>
+    <div class="field">
+      <label>Horas máx.</label>
+      <input type="number" id="horas-max" min="0.5" max="30" step="0.5" placeholder="Ex: 7" oninput="calcularPreview()">
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Qtd. de linhas</label>
+    <div class="linhas-wrap">
+      <button onclick="ajustarLinhas(-1)">−</button>
+      <input type="number" id="linhas" value="2" min="0" max="30" oninput="calcularPreview()">
+      <button onclick="ajustarLinhas(1)">+</button>
+    </div>
+    <div class="hint">R$ 4,00 por tubo</div>
+  </div>
+
+  <div class="field">
+    <label>Custo do item base (R$)</label>
+    <input type="number" id="item-extra" min="0" step="1" placeholder="Ex: 15" oninput="calcularPreview()">
+    <div class="hint" id="hint-item-extra"></div>
+  </div>
+
+  <hr class="separador">
+
+  <div class="preview-valor">
+    <div class="preview-label">Valor estimado</div>
+    <div class="preview-num" id="preview-num">R$ —</div>
+  </div>
+</div>
+
+<!-- CARD 3: FRETE -->
+<div class="card">
+  <div class="card-title"><span>3</span> Entrega</div>
+
+  <div class="frete-options">
+    <div class="frete-opt active" onclick="selecionarFrete(this,'local')" id="frete-local">
+      <div class="frete-label">📍 Local</div>
+      <div class="frete-val">Arapiraca · incluso</div>
+    </div>
+    <div class="frete-opt" onclick="selecionarFrete(this,'envio')" id="frete-envio">
+      <div class="frete-label">📦 Envio</div>
+      <div class="frete-val">Outro município</div>
+    </div>
+  </div>
+
+  <div class="frete-detalhes" id="frete-detalhes">
+    <div class="field">
+      <label>Transportadora / Serviço</label>
+      <input type="text" id="frete-transportadora" placeholder="Ex: Correios, Jadlog, mototáxi...">
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>CEP de destino</label>
+        <input type="text" id="frete-cep" placeholder="00000-000" maxlength="9" oninput="mascaraCep(this)">
+      </div>
+      <div class="field">
+        <label>Valor do frete (R$)</label>
+        <input type="number" id="frete-valor" min="0" step="1" placeholder="Ex: 25" oninput="calcularPreview()">
+      </div>
+    </div>
+    <div class="field">
+      <label>Endereço de entrega</label>
+      <input type="text" id="frete-endereco" placeholder="Rua, número, bairro, cidade">
+    </div>
+  </div>
+</div>
+
+<!-- BOTÃO -->
+<button class="btn-calcular" onclick="gerarOrcamento()">✦ Gerar orçamento</button>
+
+<!-- RESULTADO -->
+<div id="resultado">
+  <div class="wpp-card">
+    <div class="wpp-title">💬 Mensagem para WhatsApp</div>
+    <textarea id="wpp-texto" readonly></textarea>
+    <button class="btn-copiar" id="btn-copiar" onclick="copiarTexto()">📋 Copiar mensagem</button>
+  </div>
+  <button class="btn-novo" onclick="novoOrcamento()">← Novo orçamento</button>
+</div>
+
+<script>
+  const HORA = {
+    bastidor: { lineart: 30, pontocheio: 40 },
+    roupa:    { lineart: 35, pontocheio: 45 },
+    ecobag:   { lineart: 35, pontocheio: 45 },
+    chaveiro: { lineart: 10, pontocheio: 20 },
+  };
+
+  const HORAS_SUGERIDAS = {
+    bastidor: {
+      lineart:    { simples:[1,3], medio:[3,5], complexo:[5,8] },
+      pontocheio: { simples:[3,5], medio:[5,9], complexo:[9,15] },
+    },
+    roupa: {
+      lineart:    { simples:[2,4], medio:[4,7], complexo:[7,12] },
+      pontocheio: { simples:[3,5], medio:[5,9], complexo:[9,15] },
+    },
+    ecobag: {
+      lineart:    { simples:[2,4], medio:[4,7], complexo:[7,12] },
+      pontocheio: { simples:[3,5], medio:[5,9], complexo:[7,14] },
+    },
+    chaveiro: {
+      lineart:    { simples:[0.5,1], medio:[1,2], complexo:[1,2] },
+      pontocheio: { simples:[1,2],   medio:[2,4], complexo:[2,4] },
+    },
+  };
+
+  const ITEM_HINT = {
+    bastidor: 'Valor do bastidor (ex: R$12)',
+    roupa: 'Valor da peça de roupa (ex: R$55)',
+    ecobag: 'Valor da ecobag (ex: R$15)',
+    chaveiro: 'Valor do material do chaveiro (ex: R$5)',
+  };
+
+  const ITEM_DEFAULT = { bastidor:12, roupa:55, ecobag:15, chaveiro:5 };
+
+  const TECNICA_LABEL = { lineart:'Line art', pontocheio:'Ponto cheio' };
+  const ITEM_LABEL = { bastidor:'Bastidor', roupa:'Roupa', ecobag:'Ecobag', chaveiro:'Chaveiro' };
+
+  let estado = {
+    item:'', tecnica:'', complexidade:'', tamanho:'',
+    horasMin:null, horasMax:null, linhas:2, itemExtra:0,
+    freteTipo:'local', freteValor:0,
+  };
+
+  function atualizarItem() {
+    const item = document.getElementById('item').value;
+    estado.item = item;
+    estado.tecnica = '';
+    estado.tamanho = '';
+
+    // tamanhos
+    document.getElementById('campo-tamanho-bastidor').classList.add('hidden');
+    document.getElementById('campo-tamanho-roupa').classList.add('hidden');
+    if (item === 'bastidor') document.getElementById('campo-tamanho-bastidor').classList.remove('hidden');
+    if (item === 'roupa') document.getElementById('campo-tamanho-roupa').classList.remove('hidden');
+
+    // técnica
+    const div = document.getElementById('chips-tecnica');
+    div.innerHTML = '';
+    if (item) {
+      document.getElementById('campo-tecnica').classList.remove('hidden');
+      ['lineart','pontocheio'].forEach(tec => {
+        const d = document.createElement('div');
+        d.className = 'chip';
+        d.textContent = TECNICA_LABEL[tec];
+        d.dataset.val = tec;
+        d.onclick = () => selecionarTecnica(d, tec);
+        div.appendChild(d);
+      });
+      document.getElementById('item-extra').value = ITEM_DEFAULT[item];
+      document.getElementById('hint-item-extra').textContent = ITEM_HINT[item];
+      estado.itemExtra = ITEM_DEFAULT[item];
+    } else {
+      document.getElementById('campo-tecnica').classList.add('hidden');
+    }
+    calcularPreview();
+  }
+
+  function selecionarTecnica(el, tec) {
+    document.querySelectorAll('#chips-tecnica .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    estado.tecnica = tec;
+    preencherHoras();
+    calcularPreview();
+  }
+
+  function selecionarChip(el, grupo) {
+    // só desativa chips do mesmo grupo/container pai
+    el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    estado[grupo] = el.dataset.val;
+    if (grupo === 'complexidade') preencherHoras();
+    calcularPreview();
+  }
+
+  function preencherHoras() {
+    const { item, tecnica, complexidade } = estado;
+    if (!item || !tecnica || !complexidade) return;
+    const sug = HORAS_SUGERIDAS[item]?.[tecnica]?.[complexidade];
+    if (sug) {
+      document.getElementById('horas-min').value = sug[0];
+      document.getElementById('horas-max').value = sug[1];
+      estado.horasMin = sug[0];
+      estado.horasMax = sug[1];
+      calcularPreview();
+    }
+  }
+
+  function calcularPreview() {
+    estado.horasMin = parseFloat(document.getElementById('horas-min').value) || null;
+    estado.horasMax = parseFloat(document.getElementById('horas-max').value) || null;
+    estado.linhas = parseInt(document.getElementById('linhas').value) || 0;
+    const extra = document.getElementById('item-extra');
+    estado.itemExtra = extra ? (parseFloat(extra.value) || 0) : 0;
+
+    const freteInput = document.getElementById('frete-valor');
+    estado.freteValor = freteInput ? (parseFloat(freteInput.value) || 0) : 0;
+
+    const { item, tecnica, horasMin, horasMax, linhas, itemExtra, freteTipo, freteValor } = estado;
+
+    if (!item || !tecnica || !horasMin || !horasMax) {
+      document.getElementById('preview-num').textContent = 'R$ —';
+      return;
+    }
+
+    const taxa = HORA[item][tecnica];
+    const maoMin = horasMin * taxa;
+    const maoMax = horasMax * taxa;
+    const mat = (linhas * 4) + itemExtra;
+    const frete = freteTipo === 'local' ? 0 : freteValor;
+    const tMin = arredondar(maoMin + mat + frete);
+    const tMax = arredondar(maoMax + mat + frete);
+
+    document.getElementById('preview-num').textContent =
+      tMin === tMax ? `R$ ${fmt(tMin)}` : `R$ ${fmt(tMin)} – R$ ${fmt(tMax)}`;
+  }
+
+  function arredondar(v) {
+    // arredonda para múltiplo de 0.50
+    return Math.ceil(v * 2) / 2;
+  }
+
+  function fmt(v) {
+    return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function ajustarLinhas(delta) {
+    const input = document.getElementById('linhas');
+    let val = Math.max(0, (parseInt(input.value) || 0) + delta);
+    input.value = val;
+    estado.linhas = val;
+    calcularPreview();
+  }
+
+  function selecionarFrete(el, tipo) {
+    document.querySelectorAll('.frete-opt').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+    estado.freteTipo = tipo;
+    const detalhes = document.getElementById('frete-detalhes');
+    if (tipo === 'envio') {
+      detalhes.classList.add('visivel');
+    } else {
+      detalhes.classList.remove('visivel');
+      estado.freteValor = 0;
+    }
+    calcularPreview();
+  }
+
+  function mascaraCep(input) {
+    let v = input.value.replace(/\D/g,'').slice(0,8);
+    if (v.length > 5) v = v.slice(0,5) + '-' + v.slice(5);
+    input.value = v;
+  }
+
+  function gerarOrcamento() {
+    calcularPreview();
+
+    const { item, tecnica, complexidade, tamanho, horasMin, horasMax, linhas, itemExtra, freteTipo, freteValor } = estado;
+    const cliente = document.getElementById('cliente').value.trim() || 'Cliente';
+    const descricao = document.getElementById('descricao').value.trim();
+
+    if (!item || !tecnica) { alert('Preencha o item e a técnica.'); return; }
+    if (!horasMin || !horasMax || horasMin > horasMax) { alert('Informe um intervalo de horas válido.'); return; }
+
+    const taxa = HORA[item][tecnica];
+    const maoMin = horasMin * taxa;
+    const maoMax = horasMax * taxa;
+    const mat = (linhas * 4) + itemExtra;
+    const frete = freteTipo === 'local' ? 0 : freteValor;
+    const tMin = arredondar(maoMin + mat + frete);
+    const tMax = arredondar(maoMax + mat + frete);
+
+    // Info frete
+    let freteTexto = '';
+    let freteBloco = '';
+    if (freteTipo === 'local') {
+      freteTexto = 'Arapiraca';
+      freteBloco = `Você é de Arapiraca mesmo? 😄 A entrega local já tá inclusa no valor!`;
+    } else {
+      const transp = document.getElementById('frete-transportadora').value.trim();
+      const cep = document.getElementById('frete-cep').value.trim();
+      const end = document.getElementById('frete-endereco').value.trim();
+      const vFrete = freteValor > 0 ? `R$ ${fmt(freteValor)}` : 'a combinar';
+      freteTexto = `envio via ${transp || 'transportadora'}`;
+      freteBloco = `📦 *Envio:* ${transp ? transp + ' · ' : ''}${cep ? 'CEP ' + cep + ' · ' : ''}${end ? end + ' · ' : ''}Frete: ${vFrete}`;
+    }
+
+    // Monta descrição da peça
+    const itemLabel = ITEM_LABEL[item];
+    const tamanhoLabel = tamanho ? ` ${tamanho}` : '';
+    const tecnicaLabel = tecnica === 'lineart' ? 'Line art' : 'Ponto cheio';
+    const tecnicaEmoji = tecnica === 'lineart' ? '✏️' : '🎨';
+    const tecnicaDesc = tecnica === 'lineart'
+      ? 'contornos delicados e minimalistas'
+      : 'bordado preenchido e encorpado';
+
+    // Valor
+    const valorTexto = tMin === tMax
+      ? `R$ ${fmt(tMin)}`
+      : `R$ ${fmt(tMin)} a R$ ${fmt(tMax)}`;
+
+    // Descrição da peça no orçamento
+    const pecaDesc = descricao ? `\n_"${descricao}"_\n` : '';
+
+    const wpp = `${cliente}, que ideia linda! 🌿✨
+${pecaDesc}
+${tecnicaEmoji} *${tecnicaLabel.toUpperCase()}* — ${tecnicaDesc}
+▪️ ${itemLabel}${tamanhoLabel} — *${valorTexto}*
+
+💳 *Formas de pagamento:*
+▪️ PIX
+▪️ Cartão de débito ou crédito
+└ Crédito: parcelamos em até 2x sem juros. Acima disso, parcelamos com acréscimo de taxa 😉
+
+Para pagamento no cartão geramos um link — sem precisar de deslocamento, bem prático!
+
+🧵 *Para iniciar a produção:*
+Cobramos 50% na confirmação e os outros 50% na entrega 😊
+
+📦 Já incluso no valor: embalagem caprichada + taxa de deslocamento pra compra dos materiais.
+
+${freteTipo === 'local'
+  ? `Ah, e uma perguntinha: você é de Arapiraca mesmo? 😄 A entrega local já tá inclusa. Se for de outro município, a gente avalia o envio separadamente, combinado?`
+  : freteBloco}
+
+Ficou alguma dúvida? Só falar! 🤎`;
+
+    document.getElementById('wpp-texto').value = wpp;
+    document.getElementById('resultado').style.display = 'block';
+    document.getElementById('resultado').scrollIntoView({ behavior:'smooth', block:'start' });
+    document.getElementById('btn-copiar').textContent = '📋 Copiar mensagem';
+    document.getElementById('btn-copiar').classList.remove('copiado');
+  }
+
+  function copiarTexto() {
+    navigator.clipboard.writeText(document.getElementById('wpp-texto').value).then(() => {
+      const btn = document.getElementById('btn-copiar');
+      btn.textContent = '✅ Copiado!';
+      btn.classList.add('copiado');
+      setTimeout(() => {
+        btn.textContent = '📋 Copiar mensagem';
+        btn.classList.remove('copiado');
+      }, 2500);
+    });
+  }
+
+  function novoOrcamento() {
+    document.getElementById('resultado').style.display = 'none';
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+</script>
+</body>
+</html>
