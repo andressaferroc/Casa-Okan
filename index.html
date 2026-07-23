@@ -112,7 +112,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.5;}
 
 .wpp-box{background:var(--branco);border-radius:14px;padding:16px;margin:14px 14px 0;border:1.5px solid var(--bege-escuro);}
 .wpp-label{font-size:0.7rem;font-weight:600;color:var(--cinza);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;}
-#wpp-texto{width:100%;min-height:200px;background:#f0f2f5;border-radius:10px;border:none;padding:12px;font-family:'DM Sans',sans-serif;font-size:0.84rem;color:#111;resize:vertical;outline:none;line-height:1.7;}
+#wpp-texto{width:100%;min-height:220px;background:#f0f2f5;border-radius:10px;border:none;padding:12px;font-family:'DM Sans',sans-serif;font-size:0.84rem;color:#111;resize:vertical;outline:none;line-height:1.7;}
 .btn-wpp{width:100%;margin-top:10px;padding:12px;background:#25D366;color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
 .btn-aprovar{width:100%;margin-top:8px;padding:12px;background:var(--verde);color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;}
 .btn-novo-orc{width:100%;margin-top:8px;padding:11px;background:transparent;color:var(--cinza);border:1.5px solid var(--bege-escuro);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.85rem;cursor:pointer;}
@@ -504,7 +504,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.5;}
     <button class="sub-nav-btn" onclick="maisTab(this,'campanhas')">🏷️ Campanhas</button>
     <button class="sub-nav-btn" onclick="maisTab(this,'agenda')">📅 Agenda</button>
     <button class="sub-nav-btn" onclick="maisTab(this,'crm')">💌 Pós-Venda</button>
-    <button class="sub-nav-btn" onclick="maisTab(this,'stats')">📊 Stats</button>
+    <button class="sub-nav-btn" onclick="maisTab(this,'status')">📊 Status</button>
     <button class="sub-nav-btn" onclick="maisTab(this,'msgs')">💬 Mensagens</button>
   </div>
   <div id="tab-estoque">
@@ -559,19 +559,32 @@ textarea{resize:vertical;min-height:70px;line-height:1.5;}
     <div id="crm-lista"></div>
   </div>
   <div id="tab-stats" class="hidden"><div id="stats-content"></div></div>
+  
+  <!-- CENTRAL DE MENSAGENS COMPLETA E EXPANDIDA -->
   <div id="tab-msgs" class="hidden">
     <div class="card" style="margin-top:14px">
-      <div class="card-title">💬 Modelos de Mensagem Afetivas</div>
+      <div class="card-title">💬 Central de Mensagens Afetivas & Atendimento</div>
       <div class="select-wrap" style="margin-bottom:12px"><select id="msg-tipo" onchange="carregarModelo()">
-        <option value="">Selecione um modelo</option>
-        <option value="confirmacao">✅ Confirmação de produção</option>
-        <option value="pronto">🎉 Peça pronta para entrega</option>
-        <option value="cobranca">💳 Lembrete suave de pagamento</option>
-        <option value="posVenda">🌿 Pós-venda e carinho</option>
-        <option value="aniversario">🎂 Aniversário de 1 ano do bordado</option>
+        <option value="">Selecione um modelo de mensagem...</option>
+        <optgroup label="🌱 Atendimento & Início">
+          <option value="boasVindas">✨ Primeiras Boas-Vindas / Apresentação</option>
+          <option value="aprovacaoRisco">✏️ Aprovação de Arte / Risco Inicial</option>
+          <option value="confirmacao">✅ Confirmação e Produção Iniciada</option>
+        </optgroup>
+        <optgroup label="🧵 Produção & Pagamentos">
+          <option value="andamento">📸 Atualização de Andamento (Foto da peça)</option>
+          <option value="cobranca">💳 Lembrete Suave do Restante (50%)</option>
+          <option value="pronto">🎉 Peça Pronta / Agendar Entrega</option>
+        </optgroup>
+        <optgroup label="📦 Entrega & Pós-Venda">
+          <option value="preEnvio">📦 Envio Realizado / Código de Rastreio</option>
+          <option value="posVenda">🌿 Pós-Venda (Chegou bem?)</option>
+          <option value="avaliacao">⭐ Pedido de Depoimento / Foto no Insta</option>
+          <option value="aniversario">🎂 Aniversário de 1 ano do Bordado</option>
+        </optgroup>
       </select></div>
-      <div class="field"><label>Nome do cliente</label><input type="text" id="msg-cliente" oninput="carregarModelo()"></div>
-      <textarea id="msg-texto" style="min-height:140px;margin-top:8px" readonly></textarea>
+      <div class="field"><label>Nome do cliente</label><input type="text" id="msg-cliente" placeholder="Digite o nome do cliente" oninput="carregarModelo()"></div>
+      <textarea id="msg-texto" style="min-height:180px;margin-top:8px" readonly></textarea>
       <button class="btn-wpp" style="margin-top:10px" onclick="copiarMsg()">📋 Copiar mensagem</button>
     </div>
   </div>
@@ -593,7 +606,7 @@ const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 const CAPACIDADE_HORAS_SEMANA=20;
 
 // CONFIGURAÇÃO DA CHAVE PIX DA CASA OKAN
-const CHAVE_PIX = "casaokan.art@gmail.com"; // Configure sua chave pix aqui!
+const CHAVE_PIX = "casaokan.art@gmail.com"; 
 
 function toggleSidebar(){
   const sbEl=document.getElementById('sidebar');
@@ -773,7 +786,6 @@ function calcPreview(){
   const horasTotais = itens.reduce((a,it)=>a+(it.horas||0),0);
   if(horasTotais>0)verificarGargalo(horasTotais);
   
-  // Aplica Margem de Segurança (%)
   const margemSeg = parseFloat(document.getElementById('c-margem-seg')?.value) || 0;
   if(margemSeg > 0){
     sub = sub * (1 + (margemSeg / 100));
@@ -834,10 +846,9 @@ function irRevisao(){
     `📦 *Envio:*${document.getElementById('c-transp').value?' '+document.getElementById('c-transp').value:''}\nFrete: ${r.freteVal>0?'R$ '+fmt(r.freteVal):'a combinar'}`;
   
   const embTxt = embalagemAtiva ? "\n🎁 *Embalagem Afetiva Especial Casa Okan inclusa*\n" : "";
-  const descBloco=descPct>0&&cupom?`\n🏷️ *Cupom ${cupom} aplicado:* ${descPct}% de desconto\n`:'';
+  const descBloco=descPct>0&&cupom?`\n🏷️ *Cupom ${cupom} applied:* ${descPct}% de desconto\n`:'';
   const pecaDesc=desc?`\n_"${desc}"_\n`:'\n';
   
-  // MENSAGEM DO WHATSAPP AJUSTADA COM MARCA E PIX
   const wpp=`Olá, ${cliente}! Que alegria criar esse projeto com você 🌿✨\n${pecaDesc}\n${tecEmoji} *Detalhamento do seu pedido:*\n${itensTxt}\n${embTxt}${descBloco}\n✨ *Valor Total: R$ ${fmt(r.total)}*\n\n${entregaBloco}\n\n💳 *Formas de Pagamento:*\n▪️ *PIX:* ${CHAVE_PIX}\n▪️ *Cartão de crédito:* parcelamos em até 2x sem juros (ou com taxa da maquininha para mais parcelas) 😉\n\n🧵 *Início da produção:* 50% na confirmação e 50% na entrega final do bordado.\n\n📅 *Este orçamento afetivo é válido até ${dataVal.toLocaleDateString('pt-BR')}.*\n\nQualquer dúvida ou ajuste na paleta, estamos aqui! 🤎`;
   
   document.getElementById('wpp-texto').value=wpp;
@@ -873,7 +884,6 @@ async function calcAprovar(){
   if(error){toast('Erro: '+error.message);return;}
   await sb.from('caixa').insert([{pedido_id:data.id,valor_entrada:calcRes.valor*0.5,valor_restante:calcRes.valor*0.5}]);
   
-  // BAIXA AUTOMÁTICA DE ESTOQUE
   for(const it of calcRes.itens){
     if(it.item==='bastidor'){
       const{data:est}=await sb.from('estoque').select('*').ilike('nome','%bastidor%').single();
@@ -913,9 +923,8 @@ let filtroAtivo='todos';let todosPedidos=[];
 async function carregarPedidos(){const{data}=await sb.from('pedidos').select('*').order('created_at',{ascending:false});todosPedidos=data||[];renderPedidos();}
 function pedFiltro(el,f){document.querySelectorAll('.filtro').forEach(x=>x.classList.remove('active'));el.classList.add('active');filtroAtivo=f;renderPedidos();}
 
-// GESTÃO INTELIGENTE DE PRAZOS
 function calcPrazo(prazo, status){
-  if(status === 'entregue' || status === 'pronto') return null; // Não exibe alerta para peças já prontas ou entregues
+  if(status === 'entregue' || status === 'pronto') return null; 
   if(!prazo)return null;
   const hoje=new Date();hoje.setHours(0,0,0,0);
   const p=new Date(prazo+'T00:00:00');
@@ -1125,7 +1134,6 @@ async function carregarCaixa(){
   
   (hlogAll||[]).forEach(h=>horasTrabalhadas+=h.horas);
   
-  // PRÓ-LABORE COM BASE EM R$ 25,00 A HORA
   const taxaMedia=25.0; maoDeObraTotal=arred(horasTrabalhadas*taxaMedia);
   const lucroReal=recebido-custoMat-maoDeObraTotal;
   const progresso=Math.min(100,(receitaMesAtual/metaMensal)*100);
@@ -1279,20 +1287,44 @@ async function carregarStats(){
     <div style="height:16px"></div>`;
 }
 
-// MODELOS DE MENSAGEM AFETIVAS
+// MODELOS DE MENSAGEM - EXPANDIDOS E AFETIVOS
 function carregarModelo(){
   const tipo=document.getElementById('msg-tipo').value;
-  const cliente=document.getElementById('msg-cliente').value.trim()||'[nome do cliente]';
+  const cliente=document.getElementById('msg-cliente').value.trim()||'[Nome do Cliente]';
+  
   const modelos={
-    confirmacao:`${cliente}, tudo certo por aqui! 🌿✨\n\nSeu pedido foi confirmado e já está na fila do nosso ateliê. Cada pontinho será feito com muito carinho!\n\nAssim que o bordado estiver pronto, avisamos você. 🤎`,
-    pronto:`${cliente}, sua peça ficou simplesmente linda! 🧵✨\n\nEla já está prontinha, embalada e esperando por você. Como prefere combinar a entrega/retirada?\n\nEstamos ansiosas pra você ver de perto! 🌿🤎`,
-    cobranca:`Oi, ${cliente}! Tudo bem? 🌿\n\nPassando aqui com todo o carinho para lembrar sobre a última parcela/pagamento restante do seu bordado.\n\nSe precisar da nossa chave PIX novamete, é: ${CHAVE_PIX} 😊\n\nQualquer dúvida é só falar! 🤎`,
-    posVenda:`${cliente}, esperamos que a sua peça esteja trazendo muito afeto pro seu dia a dia! 🌿✨\n\nSe postar uma foto no Instagram, marca a @casaokan pra gente repostar com todo amor!\n\nE precisando de uma nova criação, as portas do ateliê estão sempre abertas 🧵🤎`,
-    aniversario:`${cliente}, faz 1 ano que o seu bordado da Casa Okan foi entregue! 🎂🌿\n\nPassou rápido, né? Pra comemorar esse ciclo, preparamos um carinho especial pra sua próxima peça com a gente. Chama a gente pra criar! 🧵🤎`,
+    // 🌱 Atendimento & Início
+    boasVindas: `Olá, ${cliente}! Que alegria ter você aqui na Casa Okan 🌿✨\n\nSomos um ateliê de bordado manual afetuoso e amamos transformar memórias e ideias em arte com fios.\n\nComo podemos te ajudar hoje? Me conta um pouquinho da sua ideia! 🤎`,
+    
+    aprovacaoRisco: `Oi, ${cliente}! ✏️✨\n\nO risco (desenho guia) do seu bordado ficou pronto! Dá uma olhada na imagem acima.\n\nO que achou da composição e das proporções? Se quiser fazer qualquer ajuste de posição ou detalhe, a hora é essa! Podemos aprovar para ir para o tecido? 🌿`,
+    
+    confirmacao: `${cliente}, tudo certo por aqui! 🌿✨\n\nSeu pedido foi confirmado e a sua arte já entrou na fila oficial de bordado do ateliê. Cada pontinho será feito com muito cuidado e carinho!\n\nAssim que começarmos a produção prática, te enviamos atualizações. 🤎`,
+    
+    // 🧵 Produção & Pagamentos
+    andamento: `Passando na sua tela com um "spoiler" cheio de afeto, ${cliente}! 📸🧵\n\nO bordado da sua peça está ganhando vida por aqui. Olha só como os pontos e cores estão ficando incríveis!\n\nEm breve ela estará prontinha. O que achou até agora? 🌿✨`,
+    
+    cobranca: `Oi, ${cliente}! Tudo bem? 🌿\n\nPassando com todo o carinho para lembrar sobre a 2ª parcela (50% restante) do seu pedido, já que a peça está quase pronta.\n\n💳 *Nossa Chave PIX:* ${CHAVE_PIX}\n\nQualquer dúvida sobre valores ou comprovantes, é só me mandar aqui! 🤎`,
+    
+    pronto: `${cliente}, sua peça ficou simplesmente maravilhosa! 🧵✨\n\nEla já está 100% pronta, cheirosa e embalada com todo o carinho aqui no ateliê.\n\nComo fica melhor pra você receber? Vamos combinar a entrega ou retirada? 🏠📦`,
+    
+    // 📦 Entrega & Pós-Venda
+    preEnvio: `Notícia boa, ${cliente}! Seu pedido da Casa Okan já está a caminho 📦✨\n\n📫 *Código de rastreio / Transportadora:* [Cole o código ou detalhes aqui]\n\nAcompanhe a entrega e nos avise assim que essa caixinha de afeto chegar aí na sua casa! 🌿🤎`,
+    
+    posVenda: `Oi, ${cliente}! Passando pra saber se a caixinha chegou direitinho por aí e se a peça atendeu todas as suas expectativas! 🌿✨\n\nEsperamos do fundo do coração que esse bordado traga muito carinho pro seu dia a dia. Foi uma alegria produzir pra você! 🤎`,
+    
+    avaliacao: `${cliente}, a sua opinião vale ouro pra gente! ⭐🌿\n\nSe você gostou da sua peça, seria lindo demais se pudesse tirar uma fotinha dela e postar nos stories marcando o nosso perfil *@casaokan*.\n\nOu, se preferir, pode deixar uma rápida mensagem aqui de avaliação. Isso nos ajuda muito a continuar espalhando arte manual! 🧵✨`,
+    
+    aniversario: `${cliente}, sabia que hoje faz exatamente 1 ano que entregamos o seu bordado? 🎂🌿\n\nO tempo voa! Pra comemorar esse ciclo, preparamos um carinho especial: 10% de desconto na criação da sua próxima peça com a gente.\n\nQuando quiser dar vida a uma nova memória em fios, as portas do ateliê estão abertas! 🧵🤎`
   };
+  
   document.getElementById('msg-texto').value=modelos[tipo]||'';
 }
-function copiarMsg(){navigator.clipboard.writeText(document.getElementById('msg-texto').value).then(()=>toast('Mensagem copiada! 💬'));}
+
+function copiarMsg(){
+  const txt = document.getElementById('msg-texto').value;
+  if(!txt){ toast('Selecione um modelo primeiro!'); return; }
+  navigator.clipboard.writeText(txt).then(()=>toast('Mensagem copiada para a área de transferência! 💬'));
+}
 
 // Init
 carregarCampanhasSelect();
