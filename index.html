@@ -320,7 +320,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.5;}
     </div>
 
     <div class="card">
-      <div class="card-title"><span class="num">1</span> Cliente</div>
+      <div class="card-title"><span class="num">1</span> Cliente & Responsável</div>
       <div class="field">
         <label>Nome do cliente</label>
         <input type="text" id="c-cliente" oninput="buscarHistorico(this.value)">
@@ -334,6 +334,20 @@ textarea{resize:vertical;min-height:70px;line-height:1.5;}
           <div class="chip active" onclick="calcChipBordadeira(this)" data-val="ambas">Ambas</div>
           <div class="chip" onclick="calcChipBordadeira(this)" data-val="Andressa">Andressa</div>
           <div class="chip" onclick="calcChipBordadeira(this)" data-val="Paloma">Paloma</div>
+        </div>
+      </div>
+
+      <!-- CADASTRO DE CHAVES PIX DAS BORDADEIRAS -->
+      <hr class="separador">
+      <div class="card-title" style="font-size:0.85rem; margin-bottom:8px;">💳 Chaves PIX das Bordadeiras</div>
+      <div class="grid-2">
+        <div class="field">
+          <label>PIX Andressa</label>
+          <input type="text" id="pix-andressa" placeholder="Chave PIX da Andressa" onchange="salvarPixLocal('andressa', this.value)">
+        </div>
+        <div class="field">
+          <label>PIX Paloma</label>
+          <input type="text" id="pix-paloma" placeholder="Chave PIX da Paloma" onchange="salvarPixLocal('paloma', this.value)">
         </div>
       </div>
     </div>
@@ -504,7 +518,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.5;}
     <button class="sub-nav-btn" onclick="maisTab(this,'campanhas')">🏷️ Campanhas</button>
     <button class="sub-nav-btn" onclick="maisTab(this,'agenda')">📅 Agenda</button>
     <button class="sub-nav-btn" onclick="maisTab(this,'crm')">💌 Pós-Venda</button>
-    <button class="sub-nav-btn" onclick="maisTab(this,'status')">📊 Status</button>
+    <button class="sub-nav-btn" onclick="maisTab(this,'stats')">📊 Stats</button>
     <button class="sub-nav-btn" onclick="maisTab(this,'msgs')">💬 Mensagens</button>
   </div>
   <div id="tab-estoque">
@@ -605,8 +619,27 @@ const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 const CAPACIDADE_HORAS_SEMANA=20;
 
-// CONFIGURAÇÃO DA CHAVE PIX DA CASA OKAN
-const CHAVE_PIX = "casaokan.art@gmail.com"; 
+// SISTEMA DE SALVAMENTO DE CHAVES PIX DAS BORDADEIRAS (LOCALSTORAGE)
+function salvarPixLocal(bordadeira, valor){
+  localStorage.setItem('pix_'+bordadeira, valor);
+  toast('Chave PIX da ' + bordadeira + ' salva!');
+}
+
+function obterPixResponsavel(b){
+  const pixAndressa = localStorage.getItem('pix_andressa') || 'casaokan.art@gmail.com';
+  const pixPaloma = localStorage.getItem('pix_paloma') || 'casaokan.art@gmail.com';
+  
+  if(b === 'Andressa') return `▪️ *PIX (Andressa):* ${pixAndressa}`;
+  if(b === 'Paloma') return `▪️ *PIX (Paloma):* ${pixPaloma}`;
+  return `▪️ *PIX (Andressa):* ${pixAndressa}\n▪️ *PIX (Paloma):* ${pixPaloma}`;
+}
+
+function carregarPixSalvo(){
+  const pixA = localStorage.getItem('pix_andressa');
+  const pixP = localStorage.getItem('pix_paloma');
+  if(pixA) document.getElementById('pix-andressa').value = pixA;
+  if(pixP) document.getElementById('pix-paloma').value = pixP;
+}
 
 function toggleSidebar(){
   const sbEl=document.getElementById('sidebar');
@@ -846,10 +879,13 @@ function irRevisao(){
     `📦 *Envio:*${document.getElementById('c-transp').value?' '+document.getElementById('c-transp').value:''}\nFrete: ${r.freteVal>0?'R$ '+fmt(r.freteVal):'a combinar'}`;
   
   const embTxt = embalagemAtiva ? "\n🎁 *Embalagem Afetiva Especial Casa Okan inclusa*\n" : "";
-  const descBloco=descPct>0&&cupom?`\n🏷️ *Cupom ${cupom} applied:* ${descPct}% de desconto\n`:'';
+  const descBloco=descPct>0&&cupom?`\n🏷️ *Cupom ${cupom} aplicado:* ${descPct}% de desconto\n`:'';
   const pecaDesc=desc?`\n_"${desc}"_\n`:'\n';
   
-  const wpp=`Olá, ${cliente}! Que alegria criar esse projeto com você 🌿✨\n${pecaDesc}\n${tecEmoji} *Detalhamento do seu pedido:*\n${itensTxt}\n${embTxt}${descBloco}\n✨ *Valor Total: R$ ${fmt(r.total)}*\n\n${entregaBloco}\n\n💳 *Formas de Pagamento:*\n▪️ *PIX:* ${CHAVE_PIX}\n▪️ *Cartão de crédito:* parcelamos em até 2x sem juros (ou com taxa da maquininha para mais parcelas) 😉\n\n🧵 *Início da produção:* 50% na confirmação e 50% na entrega final do bordado.\n\n📅 *Este orçamento afetivo é válido até ${dataVal.toLocaleDateString('pt-BR')}.*\n\nQualquer dúvida ou ajuste na paleta, estamos aqui! 🤎`;
+  // OBTÉM A CHAVE PIX INTELIGENTE
+  const pixTexto = obterPixResponsavel(bordadeira);
+
+  const wpp=`Olá, ${cliente}! Que alegria criar esse projeto com você 🌿✨\n${pecaDesc}\n${tecEmoji} *Detalhamento do seu pedido:*\n${itensTxt}\n${embTxt}${descBloco}\n✨ *Valor Total: R$ ${fmt(r.total)}*\n\n${entregaBloco}\n\n💳 *Formas de Pagamento:*\n${pixTexto}\n▪️ *Cartão de crédito:* parcelamos em até 2x sem juros (ou com taxa da maquininha para mais parcelas) 😉\n\n🧵 *Início da produção:* 50% na confirmação e 50% na entrega final do bordado.\n\n📅 *Este orçamento afetivo é válido até ${dataVal.toLocaleDateString('pt-BR')}.*\n\nQualquer dúvida ou ajuste na paleta, estamos aqui! 🤎`;
   
   document.getElementById('wpp-texto').value=wpp;
   calcRes={cliente,desc,paleta,itens:[...itens],valor:r.total,horas_totais:r.horasTotais,custo_materiais:itens.reduce((a,it)=>a+(it.linhas*(it.linhaValor||4))+(it.origemRoupa==='cliente'?0:(it.extra||0)),0),entrega:entregaTipo,bordadeira};
@@ -1291,24 +1327,22 @@ async function carregarStats(){
 function carregarModelo(){
   const tipo=document.getElementById('msg-tipo').value;
   const cliente=document.getElementById('msg-cliente').value.trim()||'[Nome do Cliente]';
+  const pixAndressa = localStorage.getItem('pix_andressa') || 'casaokan.art@gmail.com';
   
   const modelos={
-    // 🌱 Atendimento & Início
     boasVindas: `Olá, ${cliente}! Que alegria ter você aqui na Casa Okan 🌿✨\n\nSomos um ateliê de bordado manual afetuoso e amamos transformar memórias e ideias em arte com fios.\n\nComo podemos te ajudar hoje? Me conta um pouquinho da sua ideia! 🤎`,
     
     aprovacaoRisco: `Oi, ${cliente}! ✏️✨\n\nO risco (desenho guia) do seu bordado ficou pronto! Dá uma olhada na imagem acima.\n\nO que achou da composição e das proporções? Se quiser fazer qualquer ajuste de posição ou detalhe, a hora é essa! Podemos aprovar para ir para o tecido? 🌿`,
     
     confirmacao: `${cliente}, tudo certo por aqui! 🌿✨\n\nSeu pedido foi confirmado e a sua arte já entrou na fila oficial de bordado do ateliê. Cada pontinho será feito com muito cuidado e carinho!\n\nAssim que começarmos a produção prática, te enviamos atualizações. 🤎`,
     
-    // 🧵 Produção & Pagamentos
     andamento: `Passando na sua tela com um "spoiler" cheio de afeto, ${cliente}! 📸🧵\n\nO bordado da sua peça está ganhando vida por aqui. Olha só como os pontos e cores estão ficando incríveis!\n\nEm breve ela estará prontinha. O que achou até agora? 🌿✨`,
     
-    cobranca: `Oi, ${cliente}! Tudo bem? 🌿\n\nPassando com todo o carinho para lembrar sobre a 2ª parcela (50% restante) do seu pedido, já que a peça está quase pronta.\n\n💳 *Nossa Chave PIX:* ${CHAVE_PIX}\n\nQualquer dúvida sobre valores ou comprovantes, é só me mandar aqui! 🤎`,
+    cobranca: `Oi, ${cliente}! Tudo bem? 🌿\n\nPassando com todo o carinho para lembrar sobre a 2ª parcela (50% restante) do seu pedido, já que a peça está quase pronta.\n\n💳 *Chave PIX:* ${pixAndressa}\n\nQualquer dúvida sobre valores ou comprovantes, é só me mandar aqui! 🤎`,
     
     pronto: `${cliente}, sua peça ficou simplesmente maravilhosa! 🧵✨\n\nEla já está 100% pronta, cheirosa e embalada com todo o carinho aqui no ateliê.\n\nComo fica melhor pra você receber? Vamos combinar a entrega ou retirada? 🏠📦`,
     
-    // 📦 Entrega & Pós-Venda
-    preEnvio: `Notícia boa, ${cliente}! Seu pedido da Casa Okan já está a caminho 📦✨\n\n📫 *Código de rastreio / Transportadora:* [Cole o código ou detalhes aqui]\n\nAcompanhe a entrega e nos avise assim que essa caixinha de afeto chegar aí na sua casa! 🌿🤎`,
+    preEnvio: `Notícia boa, ${cliente}! Seu pedido da Casa Okan já está a caminho 📦✨\n\n📫 *Código de rastreio / Transportadora:* [Cole o código aqui]\n\nAcompanhe a entrega e nos avise assim que essa caixinha de afeto chegar aí na sua casa! 🌿🤎`,
     
     posVenda: `Oi, ${cliente}! Passando pra saber se a caixinha chegou direitinho por aí e se a peça atendeu todas as suas expectativas! 🌿✨\n\nEsperamos do fundo do coração que esse bordado traga muito carinho pro seu dia a dia. Foi uma alegria produzir pra você! 🤎`,
     
@@ -1328,6 +1362,7 @@ function copiarMsg(){
 
 // Init
 carregarCampanhasSelect();
+carregarPixSalvo();
 </script>
 </body>
 </html>
